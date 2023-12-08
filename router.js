@@ -4,7 +4,7 @@ const express = require('express');
 const userRouter = express.Router();
 const Employee = require("./employeemodel");
 
-
+const Joi = require('joi')
 
 const createEmployee = async (req, res) => {
   try {
@@ -88,7 +88,23 @@ const deleteEmployeeById = async (req, res) => {
     }
 }
 
-userRouter.post("/login", async (req, res) => {
+const constUserValidator = Joi.object({
+  username:Joi.string().required(),
+  password:Joi.string().required(),
+})
+const userValidator =(req,res,next)=> {
+   const {error} = constUsrValidator.validate(req.body);
+   if(error)
+   {
+    res.send({
+      code:400,
+      message:"Bad Requst."
+    })
+   }  
+   return next() 
+}
+
+userRouter.post("/login", userValidator,async (req, res) => {
     const { username, password } = req.body;
   
     try {
@@ -111,6 +127,9 @@ userRouter.post("/login", async (req, res) => {
       res.status(500).json({ message: "Internal Server Error" });
     }
   });
+
+
+
 
 userRouter.post("/",createEmployee);// Create Table  
 userRouter.get("/", getAllEmployees); // Read All
